@@ -17,14 +17,13 @@ make-this
 	- ROOT file with background candidate information is needed. Separately module to generate such files are under developement but general users are not expected to produce such files by themselves. Such files are currently provided under the `/pnfs/e1039/persistent/users/apun/bkg_study/e1039pythiaGen_17Nov21/*root` location. 
  	- NIM3 intensity profile from E906 data (from road set 67) are provided as `e906_rf00.root` under `macros` directory
 1. Run the pileup macro with desired methods of pileup
-	- with distribution in the form of histogram (default) from E906 NIM3 intensity profile. There is also choice to choose the inhibit threshold (in intensity distribution) and proton conversion factor.
-	- distribution in the form of function
+	- with distribution in the form of histogram (default) from E906 NIM3 intensity profile. You can choose the inhibit threshold (in intensity distribution) and proton conversion factor (following same convention as in E906 data).
+	- distribution in the form of a function
 	- or a fixed number
-```
-cd macros
-root -b -q 'Fun4Sim_pileup.C(5)'
-
-``` 
+	```
+	cd macros
+	root -b -q 'Fun4Sim_pileup.C(100)'
+	``` 
 ## Advanced Usage
 
 ### `cmake-this`
