@@ -128,7 +128,7 @@ int Fun4Sim_ana_eloss(
   if(read_hepmc) {
     Fun4AllHepMCInputManager *in = new Fun4AllHepMCInputManager("HEPMCIN");
     in->Verbosity(10);
-    in->set_vertex_distribution_mean(0,0,target_coil_pos_z,0);
+    in->set_vertex_distribution_mean(0,0,0,0);
     se->registerInputManager(in);
     in->fileopen("hepmcout.txt");
   } else {
