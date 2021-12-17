@@ -10,14 +10,14 @@
 #include "AnaPileup.h"
 
 #include <interface_main/SQHit.h>
-#include <interface_main/SQHit_v1.h>
-#include <interface_main/SQMCHit_v1.h>
-#include <interface_main/SQHitMap_v1.h>
+//#include <interface_main/SQHit_v1.h>
+//#include <interface_main/SQMCHit_v1.h>
+//#include <interface_main/SQHitMap_v1.h>
 #include <interface_main/SQHitVector_v1.h>
 #include <interface_main/SQEvent_v1.h>
-#include <interface_main/SQRun_v1.h>
-#include <interface_main/SQSpill_v1.h>
-#include <interface_main/SQSpillMap_v1.h>
+//#include <interface_main/SQRun_v1.h>
+//#include <interface_main/SQSpill_v1.h>
+//#include <interface_main/SQSpillMap_v1.h>
 #include <interface_main/SQMCEvent.h>
 #include <interface_main/SQTrackVector_v1.h>
 #include <interface_main/SQDimuonVector_v1.h>
@@ -52,7 +52,6 @@
 #include <boost/lexical_cast.hpp>
 
 #define NDET 62
-//#define LogDebug(exp)		std::cout<<"DEBUG: "  <<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 #define LogError(exp)		std::cout<<"ERROR: "  <<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 #define LogWarning(exp)	    std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 
@@ -61,8 +60,6 @@ using namespace std;
 AnaPileup::AnaPileup(const std::string& name) :
   SubsysReco(name),
   _event(0),
-  _run_header(nullptr),
-  _spill_map(nullptr),
   _event_header(nullptr),
   _hit_vector(nullptr),
   _out_name("eval.root"),
@@ -70,8 +67,54 @@ AnaPileup::AnaPileup(const std::string& name) :
 {
 
 }
+AnaPileup::~AnaPileup()
+{
+
+  delete pos1;
+  delete pos2;
+  delete pos3;
+  delete posvtx;
+  delete mom1;
+  delete mom2;
+  delete mom3;
+  delete momvtx;
+  delete rec_mom1;
+  delete rec_momvtx;
+  delete rec_posvtx;
+  delete rec_momtgt;
+  delete rec_postgt;
+
+  delete rec_pmom;
+  delete rec_nmom;
+  delete rec_ppos;
+  delete rec_npos;
+  delete rec_vtx;
+
+}
+
 
 int AnaPileup::Init(PHCompositeNode* topNode) {
+
+  pos1 = new TVector3();
+  pos2 = new TVector3();
+  pos3 = new TVector3();
+  posvtx = new TVector3();
+  mom1 = new TVector3();
+  mom2 = new TVector3();
+  mom3 = new TVector3();
+  momvtx = new TVector3();
+  rec_mom1 = new TVector3();
+  rec_momvtx = new TVector3();
+  rec_posvtx = new TVector3();
+  rec_momtgt = new TVector3();
+  rec_postgt = new TVector3();
+
+  rec_pmom = new TVector3();
+  rec_nmom = new TVector3();
+  rec_ppos = new TVector3();
+  rec_npos = new TVector3();
+  rec_vtx  = new TVector3();
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -380,17 +423,6 @@ int AnaPileup::ResetEvalVars() {
 
 int AnaPileup::GetNodes(PHCompositeNode* topNode) {
 
-  _run_header = findNode::getClass<SQRun>(topNode, "SQRun");
-  if (!_run_header) {
-    LogError("!_run_header");
-    //return Fun4AllReturnCodes::ABORTEVENT;
-  }
-
-  _spill_map = findNode::getClass<SQSpillMap>(topNode, "SQSpillMap");
-  if (!_spill_map) {
-    LogError("!_spill_map");
-    //return Fun4AllReturnCodes::ABORTEVENT;
-  }
 
   _event_header = findNode::getClass<SQEvent>(topNode, "SQEvent");
   if (!_event_header) {

@@ -30,8 +30,6 @@ class TVector3;
 class TLorentzVector;
 class TClonesArray;
 
-class SQRun;
-class SQSpillMap;
 class SQEvent;
 class SQHitVector;
 class SQHit;
@@ -53,8 +51,7 @@ class AnaPileup: public SubsysReco {
  public:
 
   AnaPileup(const std::string &name = "AnaPileup.root");
-  virtual ~AnaPileup() {
-  }
+  virtual ~AnaPileup();
 
   int Init(PHCompositeNode *topNode);
   int InitRun(PHCompositeNode *topNode);
@@ -87,8 +84,6 @@ class AnaPileup: public SubsysReco {
   size_t _event;
 
   PHG4TruthInfoContainer* _truth;
-  SQRun* _run_header;
-  SQSpillMap * _spill_map;
   SQEvent * _event_header;
   SQMCEvent     * mi_evt_true;
   SQHitVector *_hit_vector;
