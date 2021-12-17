@@ -10,14 +10,8 @@
 #include "AnaPileup.h"
 
 #include <interface_main/SQHit.h>
-//#include <interface_main/SQHit_v1.h>
-//#include <interface_main/SQMCHit_v1.h>
-//#include <interface_main/SQHitMap_v1.h>
 #include <interface_main/SQHitVector_v1.h>
 #include <interface_main/SQEvent_v1.h>
-//#include <interface_main/SQRun_v1.h>
-//#include <interface_main/SQSpill_v1.h>
-//#include <interface_main/SQSpillMap_v1.h>
 #include <interface_main/SQMCEvent.h>
 #include <interface_main/SQTrackVector_v1.h>
 #include <interface_main/SQDimuonVector_v1.h>
