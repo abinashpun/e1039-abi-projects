@@ -35,7 +35,7 @@ execute_process(COMMAND root-config --libs   OUTPUT_VARIABLE ROOT_LINK    OUTPUT
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -I$ENV{OFFLINE_MAIN}/include/ ${ROOT_CFLAGS}")
 
 add_library(ana_pileup SHARED ${sources} ana_pileup_Dict.cc)
-target_link_libraries(ana_pileup  fun4all interface_main geom_svc ktracker phg4hit PHPythia8 g4detectors UtilAna)
+target_link_libraries(ana_pileup  fun4all interface_main geom_svc ktracker phg4hit PHPythia8 g4detectors UtilAna SQPrimaryGen g4dst dptrigger g4eval g4testbench)
 install(TARGETS ana_pileup DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 # Install the pcm files in case of ROOT 6.
@@ -45,3 +45,4 @@ if (ROOT_VER GREATER 5)
    add_custom_target(install_pcm ALL COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib COMMAND cp -up *_rdict.pcm ${CMAKE_INSTALL_PREFIX}/lib)
    add_dependencies(install_pcm ana_pileup)
 endif()
+	

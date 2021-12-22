@@ -9,12 +9,12 @@
 
 #include "AnaPileup.h"
 
-#include <interface_main/SQHit.h>
-#include <interface_main/SQHitVector_v1.h>
-#include <interface_main/SQEvent_v1.h>
+
+#include <interface_main/SQHitVector.h>
+#include <interface_main/SQEvent.h>
 #include <interface_main/SQMCEvent.h>
-#include <interface_main/SQTrackVector_v1.h>
-#include <interface_main/SQDimuonVector_v1.h>
+#include <interface_main/SQTrackVector.h>
+#include <interface_main/SQDimuonVector.h>
 
 #include <ktracker/SRecEvent.h>
 #include <geom_svc/GeomSvc.h>
@@ -25,27 +25,12 @@
 #include <phool/PHIODataNode.h>
 #include <phool/getClass.h>
 
-#include <g4main/PHG4TruthInfoContainer.h>
-#include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4Hit.h>
-#include <g4main/PHG4Particle.h>
-#include <g4main/PHG4HitDefs.h>
-#include <g4main/PHG4VtxPoint.h>
 
 #include <TFile.h>
 #include <TTree.h>
 #include <TClonesArray.h>
 
-#include <cstring>
-#include <cmath>
-#include <cfloat>
-#include <stdexcept>
-#include <limits>
-#include <tuple>
 
-#include <boost/lexical_cast.hpp>
-
-#define NDET 62
 #define LogError(exp)		std::cout<<"ERROR: "  <<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 #define LogWarning(exp)	    std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 
@@ -174,31 +159,32 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
   h1Bhit = 0;
   h1Thit = 0;
 
+  GeomSvc* geomSvc = GeomSvc::instance();
 
   for(int ihit=0; ihit<_hit_vector->size(); ++ihit) {
     SQHit *sqhit = _hit_vector->at(ihit);
     int sq_detid = sqhit->get_detector_id();
 
     /// ST.1 HODOS 
-    if (sq_detid == 31){
+    if (sq_detid == geomSvc->getDetectorID("H1B")){
       new((*pos_H1B)[h1Bhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1B)[h1Bhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       eID_H1B[h1Bhit] = sqhit->get_element_id();
       ++h1Bhit;
     }
-    if (sq_detid == 32){
+    if (sq_detid == geomSvc->getDetectorID("H1T")){
       new((*pos_H1T)[h1Thit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1T)[h1Thit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       eID_H1T[h1Thit] = sqhit->get_element_id();
       ++h1Thit;
     }
-    if (sq_detid == 33){
+    if (sq_detid == geomSvc->getDetectorID("H1L")){
       eID_H1L[h1Lhit] = sqhit->get_element_id();
       new((*pos_H1L)[h1Lhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1L)[h1Lhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       ++h1Lhit;
     }
-    if (sq_detid == 34){
+    if (sq_detid == geomSvc->getDetectorID("H1R")){
       eID_H1R[h1Rhit] = sqhit->get_element_id();
       new((*pos_H1R)[h1Rhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1R)[h1Rhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
@@ -208,7 +194,7 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
 
     D0Xhit = 0;
     /// DOX CHAMBER
-    if (sq_detid ==3 ) {
+    if (sq_detid == geomSvc->getDetectorID("D0X") ) {
       eID_D0X[D0Xhit] = sqhit->get_element_id();
       new((*pos_D0X)[D0Xhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_D0X)[D0Xhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
@@ -221,18 +207,19 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
 
   _sqhits_tree->Fill();
 
-  (*pos_H1B).Delete();
-  (*pos_H1R).Delete();
-  (*pos_H1L).Delete();
-  (*pos_H1T).Delete();
+  pos_H1B->Delete();
+  pos_H1R->Delete();
+  pos_H1L->Delete();
+  pos_H1T->Delete();
 
-  (*mom_H1B).Delete();
-  (*mom_H1L).Delete();
-  (*mom_H1R).Delete();
-  (*mom_H1T).Delete();
+  mom_H1B->Delete();
+  mom_H1L->Delete();
+  mom_H1R->Delete();
+  mom_H1T->Delete();
 
-  (*pos_D0X).Delete();
-  (*mom_D0X).Delete();
+  pos_D0X->Delete();
+  mom_D0X->Delete();
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -433,11 +420,6 @@ int AnaPileup::GetNodes(PHCompositeNode* topNode) {
     return Fun4AllReturnCodes::ABORTEVENT;
   }
 
-  _truth = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-  if (!_truth) {
-    LogError("!_truth");
-    return Fun4AllReturnCodes::ABORTEVENT;
-  }
 
   trackVector  = findNode::getClass<SQTrackVector>(topNode, "SQTruthTrackVector");
   dimuonVector = findNode::getClass<SQDimuonVector>(topNode, "SQTruthDimuonVector");

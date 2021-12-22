@@ -1,20 +1,7 @@
-#include <TSystem.h>
-#include <TRandom1.h>
 #include <top/G4_Beamline.C>
 #include <top/G4_Target.C>
 #include <top/G4_InsensitiveVolumes.C>
 #include <top/G4_SensitiveDetectors.C>
-
-R__LOAD_LIBRARY(libfun4all)
-R__LOAD_LIBRARY(libPHPythia8)
-R__LOAD_LIBRARY(libg4detectors)
-R__LOAD_LIBRARY(libg4testbench)
-R__LOAD_LIBRARY(libg4eval)
-R__LOAD_LIBRARY(libg4dst)
-R__LOAD_LIBRARY(libdptrigger)
-R__LOAD_LIBRARY(libktracker)
-R__LOAD_LIBRARY(libevt_filter)
-R__LOAD_LIBRARY(libSQPrimaryGen)
 R__LOAD_LIBRARY(libana_pileup)
 
 using namespace std;
@@ -52,13 +39,9 @@ int Fun4Sim_pileup(const int nevent = 10)
   recoConsts *rc = recoConsts::instance();
   rc->set_DoubleFlag("FMAGSTR", FMAGSTR);
   rc->set_DoubleFlag("KMAGSTR", KMAGSTR);
-  //rc->set_IntFlag("RANDOMSEED", seed);
-  rc->set_DoubleFlag("SIGX_BEAM", .3);
-  rc->set_DoubleFlag("SIGY_BEAM", .3);
   rc->set_DoubleFlag("Z_UPSTREAM", -800.);
   rc->Print();
 
-  GeomSvc::UseDbSvc(true);
   GeomSvc* geom_svc = GeomSvc::instance();
   geom_svc->printTable();
 
@@ -74,12 +57,7 @@ int Fun4Sim_pileup(const int nevent = 10)
   if(function_pileup)
     {
       TF1* intensity_profile = new TF1("intensity_profile", "[0]*pow(x,[1])*exp(-[2]*x+exp(-[3]*x))+[4]", 0, 5000);
-      intensity_profile->SetParameter(0,6.35);
-      intensity_profile->SetParameter(1,1.38);
-      intensity_profile->SetParameter(2,4.9e-3);
-      intensity_profile->SetParameter(3,4.7e-3);
-      intensity_profile->SetParameter(4,178.8);
-
+      intensity_profile->SetParameters(6.35,1.38,4.9e-3,4.7e-3,178.8);//Set your function and parameters
       extgen->set_beam_intensity_profile(intensity_profile);
     }
   else if(hist_pileup)
