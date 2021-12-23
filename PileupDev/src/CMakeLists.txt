@@ -11,7 +11,7 @@ list(REMOVE_ITEM dist_headers ${non_dist_headers})
 add_custom_command (
   OUTPUT ana_pileup_Dict.cc
   COMMAND rootcint
-  ARGS -f ana_pileup_Dict.cc -c
+  ARGS -f ana_pileup_Dict.cc -noIncludePaths -inlineInputHeader -c -p
     -I$ENV{OFFLINE_MAIN}/include/ -I${ROOT_PREFIX}/include/
     ${dist_headers}
     ${PROJECT_SOURCE_DIR}/LinkDef.h
