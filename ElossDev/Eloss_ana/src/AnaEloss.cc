@@ -17,18 +17,6 @@
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4HitDefs.h>
 
-/*
-/// Tracking includes
-#include <ktracker/SRecEvent.h>
-#include <ktracker/GenFitExtrapolator.h>
-#include <GenFit/FieldManager.h>
-#include <GenFit/MaterialEffects.h>
-#include <GenFit/TGeoMaterialInterface.h>
-#include <GenFit/MeasuredStateOnPlane.h>
-#include <GenFit/SharedPlanePtr.h>
-#include <GenFit/RKTrackRep.h>
-*/
-
 /// ROOT includes
 #include <TFile.h>
 #include <TTree.h>
@@ -64,7 +52,10 @@ AnaEloss::AnaEloss(const std::string &name)
 AnaEloss::~AnaEloss()
 {
   if(eloss_tree) delete eloss_tree;
-  
+  delete truth_mom;
+  delete truth_pos;
+  delete det_mom;
+  delete det_pos; 
 }
 
 
@@ -73,6 +64,10 @@ AnaEloss::~AnaEloss()
 //
 int AnaEloss::Init(PHCompositeNode *topNode)
 {
+  truth_mom = new TVector3();
+  truth_pos = new TVector3();
+  det_mom = new TVector3();
+  det_pos = new TVector3();
 
   return Fun4AllReturnCodes::EVENT_OK;
 
@@ -148,7 +143,6 @@ int AnaEloss::GetNodes(PHCompositeNode* topNode)
     return Fun4AllReturnCodes::ABORTEVENT;
   }
   
-
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -158,19 +152,6 @@ int AnaEloss::GetNodes(PHCompositeNode* topNode)
 int AnaEloss::ElossEval(PHCompositeNode* topNode)
 {
   double mass_mu = 105.6583715/1000.;//GeV
-  PHG4HitContainer *FMAG_hits = findNode::getClass<PHG4HitContainer>(topNode, "G4HIT_fmag_0");
-
-  if (!FMAG_hits) Fun4AllReturnCodes::ABORTEVENT;
-  for(auto iter=FMAG_hits->getHits().first;
-      iter!=FMAG_hits->getHits().second;
-      ++iter) {
-    PHG4Hit* g4hit= iter->second;
-    if(g4hit->get_pz(0)<1.5) continue;
-    fmag_mom->SetXYZ(g4hit->get_px(0),g4hit->get_py(0),g4hit->get_pz(0));
-    fmag_pos->SetXYZ(g4hit->get_x(0),g4hit->get_y(0),g4hit->get_z(0));   
-
-  }
- 
   if(_truth) { 
     /// Loop over the primary truth particles
     for(auto iter=_truth->GetPrimaryParticleRange().first;
@@ -200,11 +181,10 @@ int AnaEloss::ElossEval(PHCompositeNode* topNode)
       iter!=det_hits->getHits().second;
       ++iter) {
     PHG4Hit* g4hit= iter->second;
-    if(g4hit->get_pz(0)<1.5) continue;
+    if(g4hit->get_trkid()<0) continue;//ignore secondary hits
     det_mom->SetXYZ(g4hit->get_px(0),g4hit->get_py(0),g4hit->get_pz(0));
     det_pos->SetXYZ(g4hit->get_x(0),g4hit->get_y(0),g4hit->get_z(0));  
   }
-
 
   eloss_tree->Fill();// Fill eloss Tree
 
@@ -225,8 +205,6 @@ void AnaEloss::InitTree()
 {
 
   eloss_tree = new TTree("elosstree","a tree with energy loss information via FMAG");
-  eloss_tree->Branch("fmag_mom", "TVector3",&fmag_mom);
-  eloss_tree->Branch("fmag_pos", "TVector3",&fmag_pos); 
   eloss_tree->Branch("det_pos", "TVector3",&det_pos);
   eloss_tree->Branch("det_mom", "TVector3",&det_mom);    
   eloss_tree->Branch("truth_pos", "TVector3",&truth_pos);
