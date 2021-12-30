@@ -3,7 +3,7 @@
  * \Analysis module for bkg pile up study
  * \author  Abinash Pun
  *
- * Created: 07-05-2020
+ * Created: December-2021
  */
 
 #ifndef _H_AnaPileup_H_
@@ -30,8 +30,6 @@ class TVector3;
 class TLorentzVector;
 class TClonesArray;
 
-class SQRun;
-class SQSpillMap;
 class SQEvent;
 class SQHitVector;
 class SQHit;
@@ -39,8 +37,8 @@ class SQMCEvent;
 class SQTrackVector;
 class SQDimuonVector;
 
-class PHG4TruthInfoContainer;
-class PHG4HitContainer;
+//class PHG4TruthInfoContainer;
+//class PHG4HitContainer;
 class SRecEvent;
 class SRecTrack;
 class GeomSvc;
@@ -53,8 +51,7 @@ class AnaPileup: public SubsysReco {
  public:
 
   AnaPileup(const std::string &name = "AnaPileup.root");
-  virtual ~AnaPileup() {
-  }
+  virtual ~AnaPileup();
 
   int Init(PHCompositeNode *topNode);
   int InitRun(PHCompositeNode *topNode);
@@ -86,9 +83,6 @@ class AnaPileup: public SubsysReco {
   GeomSvc *p_geomSvc;
   size_t _event;
 
-  PHG4TruthInfoContainer* _truth;
-  SQRun* _run_header;
-  SQSpillMap * _spill_map;
   SQEvent * _event_header;
   SQMCEvent     * mi_evt_true;
   SQHitVector *_hit_vector;
@@ -123,9 +117,9 @@ class AnaPileup: public SubsysReco {
   int  nim1;
   int  nim2;
 
-/// truth info
+  /// truth info
   int n_tracks;
-//hodoscope sqhit info
+  //hodoscope sqhit info
   TClonesArray* pos_H1T;
   TClonesArray* pos_H1B;
   TClonesArray* mom_H1T;
@@ -137,7 +131,7 @@ class AnaPileup: public SubsysReco {
   TClonesArray* mom_H1R;
 
 
-//Hodoscope element ID 
+  //Hodoscope element ID 
   int h1Bhit;
   int h1Thit;
   int eID_H1T[9999];
@@ -149,13 +143,13 @@ class AnaPileup: public SubsysReco {
   int eID_H1L[9999];
 
 
-//DC sqhit info
+  //DC sqhit info
   TClonesArray* pos_D0X;
   TClonesArray* mom_D0X;
   int D0Xhit;
   int eID_D0X[9999];
 
-///stuffs from recodev===
+  ///stuffs from recodev===
   TTree* trkTree;
   int charge1;
   TVector3* pos1;

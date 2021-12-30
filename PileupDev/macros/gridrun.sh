@@ -6,22 +6,21 @@ bkg_file=$3
 
 SET_CORE=/cvmfs/seaquest.opensciencegrid.org/seaquest/software/e1039/this-e1039.sh #set core you want to use
 RUN_MACRO="Fun4Sim_pileup.C" #set running macro here
-ANA_MODULE=/cvmfs/seaquest.opensciencegrid.org/seaquest/users/apun/anamodule-inst #set the module libs/include here (migrate to cvmfs area first)
 
 if [ -z ${CONDOR_DIR_INPUT+x} ];
-  then
+then
     CONDOR_DIR_INPUT=./input;
     echo "CONDOR_DIR_INPUT is initiallized as $CONDOR_DIR_INPUT"
-  else
+else
     echo "CONDOR_DIR_INPUT is set to '$CONDOR_DIR_INPUT'";
 fi
 
 if [ -z ${CONDOR_DIR_OUTPUT+x} ];
-  then
+then
     CONDOR_DIR_OUTPUT=./out;
     mkdir -p $CONDOR_DIR_OUTPUT
     echo "CONDOR_DIR_OUTPUT is initiallized as $CONDOR_DIR_OUTPUT"
-  else
+else
     echo "CONDOR_DIR_OUTPUT is set to '$CONDOR_DIR_OUTPUT'";
 fi
 
@@ -38,8 +37,8 @@ ls -lh | tee -a out.txt $CONDOR_DIR_OUTPUT/out.txt
 echo "SET_CORE = $SET_CORE"
 source $SET_CORE
 
-export LD_LIBRARY_PATH=$ANA_MODULE/lib:$LD_LIBRARY_PATH
-export  ROOT_INCLUDE_PATH=$ANA_MODULE/include:$ROOT_INCLUDE_PATH
+export LD_LIBRARY_PATH=ana-inst/lib:$LD_LIBRARY_PATH
+export  ROOT_INCLUDE_PATH=ana-inst/include:$ROOT_INCLUDE_PATH
 
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
 echo " "

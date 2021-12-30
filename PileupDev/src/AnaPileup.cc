@@ -9,18 +9,12 @@
 
 #include "AnaPileup.h"
 
-#include <interface_main/SQHit.h>
-#include <interface_main/SQHit_v1.h>
-#include <interface_main/SQMCHit_v1.h>
-#include <interface_main/SQHitMap_v1.h>
-#include <interface_main/SQHitVector_v1.h>
-#include <interface_main/SQEvent_v1.h>
-#include <interface_main/SQRun_v1.h>
-#include <interface_main/SQSpill_v1.h>
-#include <interface_main/SQSpillMap_v1.h>
+
+#include <interface_main/SQHitVector.h>
+#include <interface_main/SQEvent.h>
 #include <interface_main/SQMCEvent.h>
-#include <interface_main/SQTrackVector_v1.h>
-#include <interface_main/SQDimuonVector_v1.h>
+#include <interface_main/SQTrackVector.h>
+#include <interface_main/SQDimuonVector.h>
 
 #include <ktracker/SRecEvent.h>
 #include <geom_svc/GeomSvc.h>
@@ -31,28 +25,12 @@
 #include <phool/PHIODataNode.h>
 #include <phool/getClass.h>
 
-#include <g4main/PHG4TruthInfoContainer.h>
-#include <g4main/PHG4HitContainer.h>
-#include <g4main/PHG4Hit.h>
-#include <g4main/PHG4Particle.h>
-#include <g4main/PHG4HitDefs.h>
-#include <g4main/PHG4VtxPoint.h>
 
 #include <TFile.h>
 #include <TTree.h>
 #include <TClonesArray.h>
 
-#include <cstring>
-#include <cmath>
-#include <cfloat>
-#include <stdexcept>
-#include <limits>
-#include <tuple>
 
-#include <boost/lexical_cast.hpp>
-
-#define NDET 62
-//#define LogDebug(exp)		std::cout<<"DEBUG: "  <<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 #define LogError(exp)		std::cout<<"ERROR: "  <<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 #define LogWarning(exp)	    std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp << std::endl
 
@@ -61,8 +39,6 @@ using namespace std;
 AnaPileup::AnaPileup(const std::string& name) :
   SubsysReco(name),
   _event(0),
-  _run_header(nullptr),
-  _spill_map(nullptr),
   _event_header(nullptr),
   _hit_vector(nullptr),
   _out_name("eval.root"),
@@ -70,8 +46,54 @@ AnaPileup::AnaPileup(const std::string& name) :
 {
 
 }
+AnaPileup::~AnaPileup()
+{
+
+  delete pos1;
+  delete pos2;
+  delete pos3;
+  delete posvtx;
+  delete mom1;
+  delete mom2;
+  delete mom3;
+  delete momvtx;
+  delete rec_mom1;
+  delete rec_momvtx;
+  delete rec_posvtx;
+  delete rec_momtgt;
+  delete rec_postgt;
+
+  delete rec_pmom;
+  delete rec_nmom;
+  delete rec_ppos;
+  delete rec_npos;
+  delete rec_vtx;
+
+}
+
 
 int AnaPileup::Init(PHCompositeNode* topNode) {
+
+  pos1 = new TVector3();
+  pos2 = new TVector3();
+  pos3 = new TVector3();
+  posvtx = new TVector3();
+  mom1 = new TVector3();
+  mom2 = new TVector3();
+  mom3 = new TVector3();
+  momvtx = new TVector3();
+  rec_mom1 = new TVector3();
+  rec_momvtx = new TVector3();
+  rec_posvtx = new TVector3();
+  rec_momtgt = new TVector3();
+  rec_postgt = new TVector3();
+
+  rec_pmom = new TVector3();
+  rec_nmom = new TVector3();
+  rec_ppos = new TVector3();
+  rec_npos = new TVector3();
+  rec_vtx  = new TVector3();
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -137,31 +159,32 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
   h1Bhit = 0;
   h1Thit = 0;
 
+  GeomSvc* geomSvc = GeomSvc::instance();
 
   for(int ihit=0; ihit<_hit_vector->size(); ++ihit) {
     SQHit *sqhit = _hit_vector->at(ihit);
     int sq_detid = sqhit->get_detector_id();
 
     /// ST.1 HODOS 
-    if (sq_detid == 31){
+    if (sq_detid == geomSvc->getDetectorID("H1B")){
       new((*pos_H1B)[h1Bhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1B)[h1Bhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       eID_H1B[h1Bhit] = sqhit->get_element_id();
       ++h1Bhit;
     }
-    if (sq_detid == 32){
+    if (sq_detid == geomSvc->getDetectorID("H1T")){
       new((*pos_H1T)[h1Thit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1T)[h1Thit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       eID_H1T[h1Thit] = sqhit->get_element_id();
       ++h1Thit;
     }
-    if (sq_detid == 33){
+    if (sq_detid == geomSvc->getDetectorID("H1L")){
       eID_H1L[h1Lhit] = sqhit->get_element_id();
       new((*pos_H1L)[h1Lhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1L)[h1Lhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
       ++h1Lhit;
     }
-    if (sq_detid == 34){
+    if (sq_detid == geomSvc->getDetectorID("H1R")){
       eID_H1R[h1Rhit] = sqhit->get_element_id();
       new((*pos_H1R)[h1Rhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_H1R)[h1Rhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
@@ -171,7 +194,7 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
 
     D0Xhit = 0;
     /// DOX CHAMBER
-    if (sq_detid ==3 ) {
+    if (sq_detid == geomSvc->getDetectorID("D0X") ) {
       eID_D0X[D0Xhit] = sqhit->get_element_id();
       new((*pos_D0X)[D0Xhit]) TVector3(sqhit->get_truth_x(), sqhit->get_truth_y(), sqhit->get_truth_z());
       new((*mom_D0X)[D0Xhit]) TVector3(sqhit->get_truth_px(), sqhit->get_truth_py(), sqhit->get_truth_pz());
@@ -184,18 +207,19 @@ int AnaPileup::Eval_sqhit(PHCompositeNode* topNode)
 
   _sqhits_tree->Fill();
 
-  (*pos_H1B).Delete();
-  (*pos_H1R).Delete();
-  (*pos_H1L).Delete();
-  (*pos_H1T).Delete();
+  pos_H1B->Delete();
+  pos_H1R->Delete();
+  pos_H1L->Delete();
+  pos_H1T->Delete();
 
-  (*mom_H1B).Delete();
-  (*mom_H1L).Delete();
-  (*mom_H1R).Delete();
-  (*mom_H1T).Delete();
+  mom_H1B->Delete();
+  mom_H1L->Delete();
+  mom_H1R->Delete();
+  mom_H1T->Delete();
 
-  (*pos_D0X).Delete();
-  (*mom_D0X).Delete();
+  pos_D0X->Delete();
+  mom_D0X->Delete();
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -380,17 +404,6 @@ int AnaPileup::ResetEvalVars() {
 
 int AnaPileup::GetNodes(PHCompositeNode* topNode) {
 
-  _run_header = findNode::getClass<SQRun>(topNode, "SQRun");
-  if (!_run_header) {
-    LogError("!_run_header");
-    //return Fun4AllReturnCodes::ABORTEVENT;
-  }
-
-  _spill_map = findNode::getClass<SQSpillMap>(topNode, "SQSpillMap");
-  if (!_spill_map) {
-    LogError("!_spill_map");
-    //return Fun4AllReturnCodes::ABORTEVENT;
-  }
 
   _event_header = findNode::getClass<SQEvent>(topNode, "SQEvent");
   if (!_event_header) {
@@ -407,11 +420,6 @@ int AnaPileup::GetNodes(PHCompositeNode* topNode) {
     return Fun4AllReturnCodes::ABORTEVENT;
   }
 
-  _truth = findNode::getClass<PHG4TruthInfoContainer>(topNode, "G4TruthInfo");
-  if (!_truth) {
-    LogError("!_truth");
-    return Fun4AllReturnCodes::ABORTEVENT;
-  }
 
   trackVector  = findNode::getClass<SQTrackVector>(topNode, "SQTruthTrackVector");
   dimuonVector = findNode::getClass<SQDimuonVector>(topNode, "SQTruthDimuonVector");
